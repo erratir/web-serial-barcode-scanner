@@ -1,0 +1,36 @@
+{
+  "name": "@web-serial-barcode-scanner/core",
+  "version": "1.0.0",
+  "description": "Core functionality for Web Serial Barcode Scanner",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "browser": "dist/index.browser.js",
+  "files": [
+    "dist", "README.md", "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "keywords": [
+    "web-serial",
+    "barcode",
+    "scanner",
+    "hardware"
+  ],
+  "license": "MIT",
+  "dependencies": {},
+  "peerDependencies": {},
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erratir/web-serial-barcode-scanner.git"
+  },
+  "author": "erratir <mail4entry@gmail.com> (https://github.com/erratir)",
+  "bugs": {
+    "url": "https://github.com/erratir/web-serial-barcode-scanner/issues"
+  },
+  "homepage": "https://github.com/erratir/web-serial-barcode-scanner#readme"
+}
