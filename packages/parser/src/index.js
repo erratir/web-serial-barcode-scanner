@@ -1,3 +1,10 @@
+/**
+ * BarcodeDataParser class for parsing barcode data from Web Serial Barcode Scanner.
+ *
+ * This class provides functionality to parse various barcode formats and extract
+ * meaningful information from raw scanner data. It uses a set of parsing rules
+ * with regular expressions to identify and process different barcode types.
+ */
 class BarcodeDataParser {
     constructor() {
         this.parsingRules = [
@@ -28,23 +35,34 @@ class BarcodeDataParser {
                             mark: this.computeMark(data)
                         };
                     } catch (error) {
-                        console.error('Ошибка парсинга DataMatrix MDLP:', error);
-                        return { error: 'Ошибка парсинга DataMatrix MDLP: ' + error.message };
+                        console.error('MDLP DataMatrix parsing error:', error);
+                        return { error: 'MDLP DataMatrix parsing error: ' + error.message };
                     }
                 }
             }
         ];
     }
 
+    /**
+     * Placeholder for OMC data parsing (binary format)
+     * @param {Uint8Array} data - Binary data to parse
+     * @returns {Object} Parsed OMC data
+     * @private
+     */
     parseOMC(data) {
-        // Заглушка для парсинга OMC (данные в формате Uint8Array)
-        // TODO логика обработки бинарных данных OMC
+        // TODO: Implement OMC binary data processing logic
         return { omc: 'parsed OMC data' };
     }
 
+    /**
+     * Computes mark data from raw barcode data
+     * @param {Uint8Array} data - Raw barcode data
+     * @returns {string} Base64 encoded mark data
+     * @private
+     */
     computeMark(data) {
         if (!(data instanceof Uint8Array) || data.length === 0) {
-            console.warn('Некорректные данные для computeMark');
+            console.warn('Invalid data for computeMark');
             return '';
         }
         try {
@@ -56,16 +74,22 @@ class BarcodeDataParser {
             const binaryString = String.fromCharCode.apply(null, bytes);
             return btoa(binaryString);
         } catch (error) {
-            console.error('Ошибка в computeMark:', error);
+            console.error('computeMark error:', error);
             return '';
         }
     }
 
+    /**
+     * Parses barcode data using defined parsing rules
+     * @param {Uint8Array} data - Raw binary data from scanner
+     * @param {string} str - String representation of the data
+     * @returns {Object} Parsing result containing type, parsed data, or error
+     */
     parse(data, str) {
         console.log('Parsing data:', data, str);
         if (!(data instanceof Uint8Array)) {
             console.warn('Data is not a Uint8Array, skipping parsing');
-            return { error: 'Некорректный формат данных' };
+            return { error: 'Invalid data format' };
         }
         if (data.length > 0 && data[0] === 2) {
             return { type: 'OMC', parsed: this.parseOMC(data) };
@@ -80,19 +104,14 @@ class BarcodeDataParser {
                         }
                         return { type: rule.type, parsed };
                     } catch (error) {
-                        console.error(`Ошибка парсинга для типа ${rule.type}:`, error);
-                        return { type: rule.type, error: 'Ошибка парсинга' };
+                        console.error(`Error parsing ${rule.type} type:`, error);
+                        return { type: rule.type, error: 'Parsing error' };
                     }
                 }
             }
-            return { error: 'Неизвестный формат данных' };
+            return { error: 'Unknown data format' };
         }
     }
 }
 
-if (typeof exports !== 'undefined') {
-    exports.BarcodeDataParser = BarcodeDataParser;
-}
-
-// Для ES6 модулей
 export { BarcodeDataParser };

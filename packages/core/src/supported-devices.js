@@ -1,6 +1,14 @@
 /**
- * Список поддерживаемых устройств в новой структурированной форме
- * @type {Object} DEVICES - Объект, где ключ - vendor ID в шестнадцатеричном формате
+ * List of supported devices in structured format
+ * @type {Object} DEVICES - Object where key is vendor ID in hexadecimal format
+ *
+ * Each entry contains:
+ * - vendorName: Manufacturer name
+ * - devices: Object containing product IDs and device information
+ *   - name: Device model name
+ *
+ * This list is used for auto-detection and connection of supported barcode scanners.
+ * When a device is connected, its VID and PID are checked against this list.
  */
 const DEVICES = {
     '0C2E': {
