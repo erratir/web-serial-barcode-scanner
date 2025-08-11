@@ -114,6 +114,13 @@ const DEVICES = {
             '6001': { name: 'Сканеры с FT232RL чипом' },
             '6015': { name: 'Сканеры с FT231X чипом' }
         }
+    },
+    '2AAF': {
+        vendorName: 'ATOL',
+        devices: {
+            'C002': { name: 'АТОЛ SB3100 BT' },
+            '1009': { name: 'АТОЛ SB3100' }
+        }
     }
 };
 export { DEVICES };
