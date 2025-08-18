@@ -79,14 +79,14 @@ const formatParsedData = (data) => {
 <style scoped>
 .scan-results {
   max-width: 100%;
-  margin: 20px auto;
-  padding: 0 20px;
+  margin: 8px 0 0 0;
+  padding: 0 12px;
 }
 
 .data-columns {
   display: flex;
-  gap: 20px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .column {
@@ -95,48 +95,48 @@ const formatParsedData = (data) => {
 }
 
 .column h3 {
-  margin: 0 0 10px 0;
-  font-size: 1.2em;
+  margin: 0 0 6px 0;
+  font-size: 1em;
   color: #444;
 }
 
 .data-container {
   border: 1px solid #ccc;
   border-radius: 4px;
-  height: 400px;
+  height: calc(100vh - 260px);
   overflow-y: auto;
   background-color: #f9f9f9;
 }
 
 .empty-message {
-  padding: 20px;
+  padding: 12px;
   text-align: center;
   color: #666;
   font-style: italic;
 }
 
 .data-list {
-  padding: 10px;
+  padding: 8px;
 }
 
 .data-item {
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
   background-color: white;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
 .timestamp {
   font-size: 12px;
   color: #666;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .data-value {
   word-break: break-all;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .parsed .data-type {
@@ -147,11 +147,11 @@ const formatParsedData = (data) => {
 
 .parsed-json {
   margin: 0;
-  padding: 8px;
+  padding: 6px;
   background-color: #f0f0f0;
   border-radius: 4px;
   font-family: monospace;
-  font-size: 13px;
+  font-size: 12px;
   white-space: pre-wrap;
   word-wrap: break-word;
   border: 1px solid #ddd;

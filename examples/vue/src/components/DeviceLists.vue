@@ -1,7 +1,8 @@
 <!-- src/components/DeviceLists.vue -->
 <template>
   <div class="devices-summary">
-    <div class="devices-count-container">
+    <div class="counts-left">
+      <div class="devices-count-container">
       <span>Поддерживаемые устройства: </span>
       <span
           class="devices-count"
@@ -33,9 +34,9 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
 
-    <div class="devices-count-container">
+      <div class="devices-count-container">
       <span>Пользовательские устройства: </span>
       <span
           class="devices-count"
@@ -43,6 +44,13 @@
       >
         {{ userDevicesCount }}
       </span>
+      <button
+          class="add-user-device-btn"
+          title="Добавить пользовательское устройство"
+          @click.stop="emit('add-user-device')"
+      >
+        +
+      </button>
       <div
           id="userDevicesList"
           class="devices-list"
@@ -72,12 +80,27 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
+
+    <label class="auto-connect-inline">
+      <input type="checkbox" :checked="props.autoConnectEnabled" @change="onToggleAutoConnect" />
+      <span>Автоподключение</span>
+      <span class="status-badge" :class="props.autoConnectEnabled ? 'status-active' : 'status-inactive'">
+        {{ props.autoConnectEnabled ? 'Включено' : 'Выключено' }}
+      </span>
+    </label>
   </div>
 </template>
 
 <script setup>
 import {ref, computed, onMounted, inject, onUnmounted} from 'vue';
+
+const props = defineProps({
+  autoConnectEnabled: { type: Boolean, default: false }
+});
+
+const emit = defineEmits(['add-user-device', 'toggle-auto-connect']);
 
 // Инъекция сканера
 const scanner = inject('barcodeScanner');
@@ -154,24 +177,32 @@ onUnmounted(() => {
   document.removeEventListener('click', () => {});
   document.removeEventListener('user-devices-updated', handleUserDevicesChange);
 });
+
+const onToggleAutoConnect = (e) => {
+  emit('toggle-auto-connect', e.target.checked);
+};
 </script>
 
 <style scoped>
 .devices-summary {
-  margin: 15px 0;
-  padding: 10px;
+  margin: 8px 0;
+  padding: 8px;
   background-color: #f8f9fa;
   border-radius: 6px;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .devices-count-container {
   position: relative;
   display: inline-block;
-  margin-right: 15px;
+  margin-right: 10px;
 }
+
+.counts-left { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 
 .devices-count {
   cursor: pointer;
@@ -179,6 +210,31 @@ onUnmounted(() => {
   color: #4361ee;
   font-weight: bold;
 }
+
+.add-user-device-btn {
+  margin-left: 6px;
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid #4361ee;
+  background: #ffffff;
+  color: #4361ee;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 700;
+}
+
+.add-user-device-btn:hover {
+  background: #4361ee;
+  color: #ffffff;
+}
+
+.auto-connect-inline { display: inline-flex; align-items: center; gap: 8px; }
+.auto-connect-inline .status-badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+.status-active { background-color: #d4edda; color: #155724; }
+.status-inactive { background-color: #f8d7da; color: #721c24; }
 
 .devices-list {
   position: absolute;

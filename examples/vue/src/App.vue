@@ -1,7 +1,10 @@
 <template>
   <div id="app">
     <header class="header-container">
-      <h1>Web Serial Barcode Scanner</h1>
+      <div class="title-block">
+        <h1>Web Serial Barcode Scanner</h1>
+        <p class="caption">Интеграция с Web Serial API для сканеров штрихкодов</p>
+      </div>
       <a href="https://github.com/erratir/web-serial-barcode-scanner"
          class="github-link"
          target="_blank"
@@ -11,8 +14,6 @@
         </svg>
       </a>
     </header>
-    <p>Интеграция с Web Serial API для сканеров штрихкодов</p>
-
     <main>
       <barcode-scanner-control />
       <barcode-scan-results />
@@ -62,22 +63,24 @@ body {
 
 header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  padding: 20px 0;
-  position: relative;
+  gap: 16px;
+  padding: 10px 0 6px 0;
 }
 
 header h1 {
   color: var(--secondary-color);
-  margin-bottom: 10px;
+  margin-bottom: 2px;
+  font-size: 22px;
 }
 
-header p {
+.caption {
   color: #666;
-  font-size: 1.1em;
+  font-size: 0.95em;
 }
+
+.title-block { display: flex; flex-direction: column; align-items: flex-start; }
 
 footer {
   text-align: center;

@@ -1,97 +1,32 @@
 <template>
   <div class="barcode-scanner-control">
-    <h2>Управление сканером штрихкодов</h2>
-    <device-lists />
-
-    <div class="control-section">
-      <button @click="toggleConnection" class="main-control-btn">
-        {{ isConnected ? 'Отключить сканер' : 'Подключить сканер' }}
-      </button>
-
-      <div class="auto-connect-control">
-        <label>
-          <input
-              type="checkbox"
-              v-model="autoConnectEnabled"
-              @change="toggleAutoConnect"
-          />
-          Автоподключение
-        </label>
-        <span class="status-badge" :class="autoConnectStatusClass">
-          {{ autoConnectStatusText }}
-        </span>
+    <div class="title-row">
+      <h2>Управление сканером штрихкодов</h2>
+      <div class="title-actions">
+        <button @click="toggleConnection" class="main-control-btn">
+          {{ isConnected ? 'Отключить сканер' : 'Подключить сканер' }}
+        </button>
+        <button class="settings-btn" @click="showSettingsModal = true" title="Настройки сканера" aria-label="Настройки">⚙️</button>
       </div>
     </div>
+    <device-lists
+        :auto-connect-enabled="autoConnectEnabled"
+        @toggle-auto-connect="toggleAutoConnectFromList"
+        @add-user-device="showCustomDeviceForm = true"
+    />
 
-    <div class="settings-section">
-      <h3>Настройки сканера</h3>
+    
 
-      <div class="setting-group">
-        <label>
-          Интервал опроса COM порта:
-          <select v-model="interByteTimeout" @change="updateInterByteTimeout">
-            <option v-for="interval in timeoutOptions" :key="interval" :value="interval">
-              {{ interval }} мс
-            </option>
-          </select>
-        </label>
-      </div>
+    <custom-device-modal
+        v-if="showCustomDeviceForm"
+        @submit="onCustomDeviceSubmit"
+        @close="showCustomDeviceForm = false"
+    />
 
-      <div class="setting-group">
-        <label>
-          Скорость передачи COM-порта:
-          <select v-model="baudRate" @change="updateBaudRate">
-            <option v-for="rate in baudRateOptions" :key="rate" :value="rate">
-              {{ rate }}
-            </option>
-          </select>
-        </label>
-      </div>
-
-      <div class="setting-group">
-        <label>
-          Интервал проверки подключенных устройств:
-          <select v-model="reconnectDelay" @change="updateReconnectDelay">
-            <option v-for="delay in reconnectDelayOptions" :key="delay" :value="delay">
-              {{ delay }} мс
-            </option>
-          </select>
-        </label>
-      </div>
-
-      <div class="custom-device-section">
-        <h4>Добавить пользовательское устройство</h4>
-        <div class="device-inputs">
-          <div class="input-group">
-            <label>
-              VID (4 символа):
-              <input
-                  v-model="vid"
-                  maxlength="4"
-                  :class="{ 'error-input': vidError }"
-                  placeholder="Например, 1A86"
-              />
-            </label>
-            <span v-if="vidError" class="error-message">{{ vidError }}</span>
-          </div>
-
-          <div class="input-group">
-            <label>
-              PID (4 символа):
-              <input
-                  v-model="pid"
-                  maxlength="4"
-                  :class="{ 'error-input': pidError }"
-                  placeholder="Например, 5723"
-              />
-            </label>
-            <span v-if="pidError" class="error-message">{{ pidError }}</span>
-          </div>
-
-          <button @click="addCustomDevice" class="add-device-btn">Добавить устройство</button>
-        </div>
-      </div>
-    </div>
+    <settings-modal
+        v-if="showSettingsModal"
+        @close="showSettingsModal = false"
+    />
 
     <div class="status-section" :class="statusClass">
       {{ statusMessage }}
@@ -104,6 +39,8 @@ import { ref, computed, onMounted, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBarcodeScannerStore } from '../stores/web-serial-barcode-scanner.js'
 import DeviceLists from './DeviceLists.vue';
+import CustomDeviceModal from './CustomDeviceModal.vue';
+import SettingsModal from './SettingsModal.vue';
 
 // Получаем доступ к хранилищу
 const store = useBarcodeScannerStore();
@@ -121,11 +58,18 @@ const {
 const scanner = inject('barcodeScanner');
 
 // Реактивные переменные для формы
+const showCustomDeviceForm = ref(false);
 const vid = ref('');
 const pid = ref('');
 const vidError = ref('');
 const pidError = ref('');
+const showSettingsModal = ref(false);
 
+const onCustomDeviceSubmit = ({ vid: v, pid: p }) => {
+  vid.value = v;
+  pid.value = p;
+  addCustomDevice();
+};
 // Опции для выпадающих списков
 const timeoutOptions = [10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000];
 const baudRateOptions = [300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200];
@@ -165,6 +109,15 @@ const toggleAutoConnect = (e) => {
     scanner.disableAutoConnect();
   }
   store.setAutoConnect(e.target.checked);
+};
+
+const toggleAutoConnectFromList = (checked) => {
+  if (checked) {
+    scanner.enableAutoConnect();
+  } else {
+    scanner.disableAutoConnect();
+  }
+  store.setAutoConnect(checked);
 };
 
 const updateInterByteTimeout = () => {
@@ -215,6 +168,7 @@ const addCustomDevice = () => {
     pid.value = '';
     vidError.value = '';
     pidError.value = '';
+    showCustomDeviceForm.value = false;
   }
 };
 
@@ -253,31 +207,60 @@ onMounted(() => {
 
 <style scoped>
 .barcode-scanner-control {
-  max-width: 80%;
-  margin: 20px auto;
-  padding: 20px;
+  width: 100%;
+  max-width: none;
+  margin: 8px 0 12px 0;
+  padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.barcode-scanner-control h2 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title-actions { display: inline-flex; align-items: center; gap: 8px; }
+
+.settings-btn {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.settings-btn:hover {
+  background: #f5f5f5;
 }
 
 .control-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #eee;
 }
 
 .main-control-btn {
-  padding: 10px 20px;
+  padding: 6px 12px;
   background-color: #4361ee;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
@@ -289,13 +272,13 @@ onMounted(() => {
 .auto-connect-control {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 14px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
   font-weight: bold;
 }
 
@@ -310,41 +293,55 @@ onMounted(() => {
 }
 
 .settings-section {
-  margin: 20px 0;
+  margin: 8px 0 6px 0;
+}
+
+.settings-section h3 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #444;
 }
 
 .setting-group {
-  margin: 15px 0;
-  display: flex;
+  margin: 0;
+  display: inline-flex;
   align-items: center;
+  margin-right: 12px;
 }
 
 .setting-group label {
   flex: 1;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 select {
-  padding: 8px 12px;
+  padding: 6px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   background-color: white;
   min-width: 120px;
+  font-size: 13px;
 }
 
 .custom-device-section {
-  margin-top: 25px;
-  padding-top: 15px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid #eee;
+}
+
+.custom-device-section h4 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #444;
 }
 
 .device-inputs {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 6px;
 }
 
 .input-group {
@@ -355,15 +352,15 @@ select {
 .input-group label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   margin: 0;
 }
 
 input {
-  padding: 8px 12px;
+  padding: 6px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .error-input {
@@ -380,23 +377,40 @@ input {
   background-color: #4cc9f0;
   color: white;
   border: none;
-  padding: 8px 15px;
+  padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
   align-self: flex-start;
+  font-size: 13px;
 }
 
 .add-device-btn:hover {
   background-color: #48b9d1;
 }
 
+.cancel-device-btn {
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  align-self: flex-start;
+  font-size: 13px;
+}
+
+.cancel-device-btn:hover {
+  background-color: #f2f2f2;
+}
+
 .status-section {
-  margin-top: 20px;
-  padding: 15px;
+  margin-top: 12px;
+  padding: 10px;
   border-radius: 6px;
   text-align: center;
-  font-size: 1.1em;
+  font-size: 0.95em;
   font-weight: 500;
 }
 
